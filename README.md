@@ -23,7 +23,7 @@ DISCORD SAVE READER is designed to provide users informations about their Discor
 
 ## Installation
 
-You can access the tool at that url : [Simple Discord Package Reader]([nael880](https://nael880.github.io/projets/discordpackagereader.html))
+You can access the tool at that url : [Simple Discord Package Reader]([nael880](https://nael880.github.io/tools/discordsavereader.html))
 
 
 ## Usage

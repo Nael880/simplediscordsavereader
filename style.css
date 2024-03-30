@@ -1,0 +1,318 @@
+@font-face {
+    font-family: MoonFont;
+    src: url(fonts/moon_get-Heavy.ttf);
+}
+@font-face {
+    font-family: BuildRg;
+    src: url(fonts/built_titling_rg.otf);
+}
+@font-face {
+    font-family: BuildLt;
+    src: url(fonts/built_titling_lt.otf);
+}
+@font-face {
+    font-family: BuildRgit;
+    src: url(fonts/built_titling_rg_it.otf);
+}
+@font-face {
+    font-family: Coolvetica;
+    src: url(fonts/coolvetica_rg.otf);
+}
+html,body {
+    font-family: Arial, sans-serif;
+    background: rgb(63,0,113);
+    background: linear-gradient(90deg, rgba(63,0,113,1) 0%, rgba(11,11,87,1) 100%);
+    background-repeat: no-repeat;
+    height: 100%;
+    /*Scroll Box Removing*/
+    overflow: hidden; 
+    overflow-x: hidden; 
+}
+/*Title Style*/
+.title{
+    text-align: center;
+    font-size: 38px;
+    color: #e9e4fd;
+    font-family: MoonFont;
+}
+.LogoImage{
+    position: absolute;
+    height: 5vw;
+    width: 5vw;
+    margin: auto;
+
+}
+/*Upload Box and related Style */
+.uploadboxsup{
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 200px;
+    border-top: 2px solid white;
+    border-bottom: 2px solid white;
+}
+
+.uploadbox{
+    width: 100vw; 
+    padding-top:20px;
+    padding-bottom:20px;
+    text-align: center;
+}
+
+/*-------------------------| "Upload Box" Button Style*/
+.uploadboxbutton{
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #45a049;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.uploadboxbutton:before {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s;
+    z-index: 0;
+    transform: translate(-50%, -50%);
+}
+
+.uploadboxbutton:hover:before {
+    width: 0;
+    height: 0;
+    top: 50%;
+    left: 50%;
+}
+
+.uploadboxbutton:hover {
+    background-color: #4CAF50;
+    transform: scale(1.1);
+}
+
+/* Animation de clic */
+.uploadboxbutton:active {
+    transform: scale(0.9);
+}
+
+/* Animation pour le texte */
+.uploadboxbutton span {
+    display: inline-block;
+    position: relative;
+    transition: transform 0.3s;
+}
+
+.uploadboxbutton:hover span {
+    transform: translateY(-4px);
+}
+
+.tutorial{
+    font-family: BuildLt;
+    font-size: 25px;
+    text-align: center;
+    color: white;
+    font-stretch: extra-expanded;
+
+}
+/*-------------------------| "Select File" Button Style*/
+.selectbutton{
+    /* Remove Default Input Style*/
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: bold;
+    color: white;
+    background-color: transparent;
+    border: 2px solid white;
+    margin: 2px;
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s, transform 0.3s;
+
+}
+.selectbutton input[type="file"]{
+    text-align: center;
+}
+.selectbutton:before {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s;
+    z-index: 0;
+    transform: translate(-50%, -50%);
+}
+
+.selectbutton:hover:before {
+    width: 0;
+    height: 0;
+    top: 50%;
+    left: 50%;
+}
+
+.selectbutton:hover {
+    background-color: white;
+    color: #0b0b57;
+    transform: scale(1.1);
+}
+
+/* Clic anim */
+.selectbutton:active {
+    transform: scale(0.9);
+}
+
+/* Text Anim */
+.selectbutton span {
+    display: inline-block;
+    position: relative;
+    transition: transform 0.3s;
+}
+
+.selectbutton:hover span {
+    transform: translateY(-4px);
+}
+
+/* Remove default style */
+.selectbutton::-webkit-file-upload-button {
+    display: none;
+}
+
+
+/*Output and related Style */
+#output {
+    /*Switchable parameter*/
+    display: none;
+
+    /*Constant Parameters*/
+    margin: 0 auto 5vh;
+    border: 1px solid #fff;
+    padding: 2vh;
+    width: 90vw;
+    max-height: 75vh;
+    height: 80%;
+    overflow: auto;
+    background-color: transparent;
+    color: white;
+    text-align: center;
+    border: 3px solid white;
+    border-radius: 15px;
+    justify-content: space-around;
+    overflow-x: hidden; 
+
+}
+.divavatar{
+    position: absolute;
+    margin-top: 3vh;
+    margin-left: 0.375vw; 
+    height: 100px; 
+    width: 100px; 
+    justify-content: center;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.avatar {
+    position: relative;
+    height: 100px; 
+    width: 100px; 
+    border: 3px solid white;
+    border-radius: 10px;
+}
+.divavatartext{
+    margin-top: 0.5vh;
+    size: 1.3vh;
+}
+.outputtext{
+    position:relative;
+    text-align: center;
+    margin-left: 10%;
+}
+
+.divstat{
+    position: relative;
+    color: #fff;
+    border-top: 1px solid #fff;
+    padding: 0 20px;
+    background-color: transparent;
+    color: white;
+    text-align: center;
+}
+.divstattitle {
+    font-size: 25px;
+    padding: 20px;
+    font-family: BuildRg;
+    font-stretch: expanded;
+}
+.divstattext-left{
+    text-align: left;
+    font-family: Coolvetica;
+    font-size: 23px;
+    font-stretch: expanded;
+}
+.divstattext-center{
+    text-align: center;
+    font-family: Coolvetica;
+    font-size: 21px;
+    border-bottom: 1px solid #fff;
+    padding: 10px 0;
+}
+.divstattext-right{
+    margin-left: auto;
+    text-align: right;
+    font-family: BuildRgit;
+    font-size: 20px;
+}
+.divstattext-sup{
+    display: flex;
+    flex-direction:row;
+    align-items: stretch;
+    border-bottom: 1px solid #fff;
+    padding: 10px 0;
+}
+.divstatsup{
+    position: relative;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    margin-left: 5px;
+	margin-right: 5px;
+    height: 350px;
+    width: 400px;
+    overflow: auto;
+    overflow-x: hidden;
+    border: 3px solid white;
+    border-radius: 15px;
+}
+
+/*Copyright Notice Style*/
+.copyrightstyle{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    z-index: 999;
+}

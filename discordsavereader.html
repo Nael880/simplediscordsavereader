@@ -1,0 +1,258 @@
+<!--
+Copyright © 2024 ZBIRI Nael. All rights reserved.
+
+For permissions or inquiries, please contact:
+
+ZBIRI Nael
+-->
+
+<!DOCTYPE html> 
+<html lang="en"> 
+
+<head>
+    <link rel="stylesheet" href="style.css"> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISCORD SAVE READER - By ZBIRI Nael</title> 
+    <img class="LogoImage" src="Logo.png"> 
+</head>
+
+<body>
+    <h2 class="title">DISCORD SAVE READER</h2> 
+
+    <div id="uploadboxid" class="uploadboxsup">
+        <div class="uploadbox"> 
+            <label for="fileInput" class="selectbutton"> 
+                <input style="display:none;" id="fileInput" type="file" accept=".zip" onchange="updateInfotext()"> <!-- Hidden file input because we want to personnalize it -->
+                <span id="infotxt">Select a file</span> <!-- Personalized text in that input -->
+            </label><br><br>
+            <button class="uploadboxbutton" onclick="handleFile()">Upload File</button> <!-- Link with the script -->
+        </div>
+    </div>
+    <div id="tutorialid" class="tutorial"> 
+        <p>Upload your package.zip save file to access simple details about your account</p> 
+        <p>Claim your file at : DiscordApp > UserSettings > Privacy & Safety > Scroll Down and Request All Data</p> 
+    </div>
+    <div id="output" class="output"></div> <!-- The container that will receive all the user' stats -->
+
+    <div class="copyrightstyle">
+        <p>&copy; 2024 ZBIRI Nael. All Rights Reserved.</p> <!-- Copyright 2024 ZBIRI Nael. All Rights Reserved. -->
+    </div>
+
+    <script>
+        function updateInfotext() { // Function used to update the text of the input button
+            const fileInput = document.getElementById('fileInput'); 
+            const infotext = document.getElementById('infotxt'); 
+            const file = fileInput.files[0]; // Gets the uploaded file
+            if (file) { // Checks if a file is selected
+                infotext.textContent = file.name; // Sets the text content of an element to the file name
+            } else {
+                infotext.textContent = 'Select a file'; // Sets default text content
+            }
+        }
+
+        function handleFile() { // (BIG) function that will do all the work from here
+            const fileInput = document.getElementById('fileInput');
+            const outputDiv = document.getElementById('output'); 
+            const file = fileInput.files[0]; // Gets the upload file
+            let conversationCounts = {}; //Variables used to build the stats
+            let userNames = {}; 
+
+            if (!file) { 
+                outputDiv.innerHTML = '<p>Select a ZIP File.</p>'; 
+                return; 
+            }
+
+            if (!file.name.endsWith('.zip')) { 
+                outputDiv.innerHTML = '<p>Must be a ZIP file.</p>'; 
+                return; 
+            }
+
+            //IF SUCCESS
+            document.getElementById('uploadboxid').style.display = 'none'; // Changes the display style of the uploadbox 
+            document.getElementById('tutorialid').style.display = 'none'; // the tutorial box
+            document.getElementById('output').style.display = 'flex'; // and the previously hidden output
+
+            const reader = new FileReader(); // Creates a new file reader object
+
+            reader.onload = function (e) { // Defines an onload event handler
+                const zip = new JSZip(); // Creates a new JSZip object
+                const zipContent = e.target.result; // we get the results from the FileReader
+
+                zip.loadAsync(zipContent).then(function (zip) { // Loads the ZIP content
+
+                    const promises = []; // Initializes an empty array for promises
+
+                    //NOTE : we will use promises to ensure that the collected data will be used only if the process if finished
+
+
+                    //Part of the code that displays the user's avatar and name
+                    zip.forEach(function (relativePath, zipEntry) { // Iterates over each file in the ZIP
+                        if (relativePath === 'account/avatar.png') { // Checks if the file path matches
+                            const promise = zipEntry.async("blob").then(function (blob) { // Reads the file asynchronously
+                                const imageUrl = URL.createObjectURL(blob); // Creates a URL for the image blob
+                                return zip.file("account/user.json").async("string").then(function (userJsonString) { // the required data is located in user.json
+                                    const userJson = JSON.parse(userJsonString); // Parses JSON data
+                                    let username = userJson.username; // Gets the username
+                                    username = username.endsWith('#0') ? username.slice(0, -2) : username; // Modifies the username
+                                    if (username !== "Unknown") { // Checks if the username is not "Unknown" cause it will be boring
+                                        const avatarDiv = document.createElement('div'); // Main avatar div
+                                        avatarDiv.classList.add('divavatar'); // Adds a class to the div
+                                        const usernameElement = document.createElement('p'); // Text that will receive the username
+                                        usernameElement.classList.add('divavatartext'); // Adds a class to that text
+                                        usernameElement.textContent = username; // Sets the text content
+                                        avatarDiv.innerHTML += '<img class="avatar" src="' + imageUrl + '" alt="Avatar">'; // Display avatar
+                                        avatarDiv.appendChild(usernameElement); // Appends all that to the main output div
+                                        output.appendChild(avatarDiv); 
+                                    }
+                                }).catch(function (error) { // Handles errors
+                                    console.error("Error reading user.json", error);
+                                });
+                            });
+                            promises.push(promise); // Adds a promise to the array
+                        }
+                    });
+                    
+                    //Part of the code that displays the user's servers
+                    zip.loadAsync(zipContent).then(function(zip) { // Loads the ZIP content asynchronously
+
+                        let serversCount = 0; // Initializes a variable
+                        const serverNames = []; // Initializes an empty array
+
+                        //Each server information is located in weird path like servers/XXXXXXXXXXXX/guild.json 
+                        //To get the servername we will iterate over each folder get the json and get the servername with the "name" key
+                        //And we will fix a variable that will increment each time we do that, to get the servers number
+                        zip.folder("servers").forEach(function (relativePath, zipEntry) { 
+                            if (zipEntry.dir) { // Checks if it's a directory
+                                serversCount++; // Increments the count
+                                const cleanRelativePath = relativePath.replace(/[^0-9]/g, ''); //In the path XXXXXXXXXXXX must be a number
+                                zip.file(`servers/${cleanRelativePath}/guild.json`).async("string").then(function (guildJsonString) { 
+                                    const guildJson = JSON.parse(guildJsonString); 
+                                    const serverName = guildJson.name; // Gets the server name
+                                    serverNames.push(serverName); // Adds the server name to the array
+
+                                    if (serverNames.length === serversCount) { // Checks if all server names are collected
+                                        displayServerList(serverNames); // display the server list
+                                    }
+                                }).catch(function (error) { // Handles errors
+                                    console.error("Error reading guild.json", error); 
+                                });
+                            }
+                        });
+
+                        //Function that will display the server list
+                        function displayServerList(serverNames) { 
+                            serverNames.sort(); // Sorts the server names in alphabetical order
+                            const serverListDivSup = document.createElement('div'); 
+                            serverListDivSup.classList.add('divstatsup'); 
+                            outputDiv.appendChild(serverListDivSup); 
+
+                            const serversMsg = document.createElement('div'); 
+                            serversMsg.classList.add('divstattitle'); 
+                            serversMsg.textContent = `You have joined ${serversCount} servers`; 
+                            serverListDivSup.appendChild(serversMsg); 
+        
+                            const serverListDiv = document.createElement('div'); 
+                            serverListDiv.classList.add('divstat'); 
+                            serverNames.forEach(serverName => { 
+                                const p = document.createElement('div'); 
+                                p.classList.add('divstattext-center'); 
+                                p.textContent = serverName; 
+                                serverListDiv.appendChild(p);
+                            });
+                            serverListDivSup.appendChild(serverListDiv); 
+                        }
+                    });
+
+                    //We will now get all the friends that had a conversation and our messages number with them
+                    //It's a little bit complicated from now. In the folder messages/, we have a large number
+                    //Of folders named XXXXXXXXXXXXX (only numbers). It represents the id of the person we had a conversation with.
+                    //In each of these folders there are an index.json file that contains all the messages sent.
+                    //The length of this json represent the total number of messages sent to that person
+                    //Moreover, with that folder name (so the id of the person) we can get the username located in messages/messages.json
+                    //In that file all the data is of the form {"userid": Direct Message with username}
+                    //So we can extract the username if we get the value from the key, and then if we remove that first part
+                    //with it's length information.
+                    //NOTE: We ignore Unknown/undefined usernames
+                    zip.folder("messages").forEach(function (relativePath, zipEntry) { 
+                        if (zipEntry.dir) { 
+                            const userId = relativePath.substring(1, relativePath.length - 1); // Gets the user ID
+                            const promise = zip.file("messages/" + relativePath + "messages.json").async("string").then(function (messagesJsonString) { 
+                                const messagesJson = JSON.parse(messagesJsonString); 
+                                if (userNames[userId] === undefined) { // Checks if the user name is undefined
+                                    const indexPromise = zip.file("messages/index.json").async("string").then(function (indexJsonString) { 
+                                        const indexJson = JSON.parse(indexJsonString); 
+                                        if (indexJson[userId] && indexJson[userId].startsWith("Direct Message with")) { 
+                                            let userName = indexJson[userId].substring("Direct Message with".length).trim(); // Modifies the user name
+                                            userName = userName.endsWith('#0') ? userName.slice(0, -2) : userName; // Modifies the user name
+                                            if (userName !== "Unknown") { // check if the user name is not "Unknown"
+                                                userNames[userId] = userName; // We than Set the user name
+                                            }
+                                        }
+                                    }).catch(function (error) { 
+                                        console.error("Error reading index.json", error); 
+                                    });
+                                    promises.push(indexPromise); 
+                                }
+                                const conversationCount = messagesJson.length; // We now have the number of messages and the conversation count
+                                conversationCounts[userId] = conversationCount; 
+                            }).catch(function (error) { 
+                                console.error("Error reading messages.json", error); 
+                            });
+                            promises.push(promise); 
+                        }
+                    });
+
+                    //After all of that is finished we can display for real all the collected data
+                    Promise.all(promises).then(function () { // Executes when all promises are resolved
+                        const sortedCounts = Object.entries(conversationCounts).sort((a, b) => b[1] - a[1]); // We sort conversation counts
+
+                        const top10 = sortedCounts; // We assign sorted counts to a variable
+
+                        const leaderboardmsgdiv = document.createElement('div'); 
+                        leaderboardmsgdiv.classList.add('divstatsup'); 
+                        outputDiv.appendChild(leaderboardmsgdiv); 
+
+                        const leaderboardtitle = document.createElement('div');
+                        leaderboardtitle.textContent = "Most Chatted Users"; 
+                        leaderboardtitle.classList.add('divstattitle'); 
+                        leaderboardmsgdiv.appendChild(leaderboardtitle); 
+
+                        const top10Div = document.createElement('div'); 
+                        top10Div.classList.add('divstat'); 
+
+                        top10.forEach(([userId, count]) => { 
+                            const userName = userNames[userId] || "Unknown"; 
+                            if (userName !== "Unknown") { 
+                                const sup_p = document.createElement('div'); 
+                                sup_p.classList.add('divstattext-sup');
+                                top10Div.appendChild(sup_p); 
+                                const p = document.createElement('div'); 
+                                p.classList.add('divstattext-left'); 
+                                p.textContent = `${userName} `; 
+                                const p2 = document.createElement('div'); 
+                                p2.classList.add('divstattext-right'); 
+                                p2.textContent = `${count} messages`; 
+                                sup_p.appendChild(p); 
+                                sup_p.appendChild(p2); 
+                            }
+                        });
+
+                        leaderboardmsgdiv.appendChild(top10Div); 
+                    });
+                });
+            };
+
+            reader.onerror = function (e) { 
+                outputDiv.innerHTML = '<p>Error while reading the file.</p>'; 
+            };
+
+            reader.readAsArrayBuffer(file); 
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script> <!-- The JSZIP library that we we will in all this code -->
+
+</body>
+
+</html>
